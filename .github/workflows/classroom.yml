@@ -1,0 +1,44 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: ".tests/max_test.py"
+      id: tests-max-test-py
+      uses: classroom-resources/autograding-python-grader@v1
+      with:
+        timeout: 10
+        max-score: 4
+        setup-command: ''
+    - name: ".tests/mean_test.py"
+      id: tests-mean-test-py
+      uses: classroom-resources/autograding-python-grader@v1
+      with:
+        timeout: 10
+        max-score: 4
+        setup-command: ''
+    - name: ".tests/meanstd_test.py"
+      id: tests-meanstd-test-py
+      uses: classroom-resources/autograding-python-grader@v1
+      with:
+        timeout: 10
+        max-score: 3
+        setup-command: ''
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TESTS-MAX-TEST-PY_RESULTS: "${{steps.tests-max-test-py.outputs.result}}"
+        TESTS-MEAN-TEST-PY_RESULTS: "${{steps.tests-mean-test-py.outputs.result}}"
+        TESTS-MEANSTD-TEST-PY_RESULTS: "${{steps.tests-meanstd-test-py.outputs.result}}"
+      with:
+        runners: tests-max-test-py, tests-mean-test-py, tests-meanstd-test-py
